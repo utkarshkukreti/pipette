@@ -23,7 +23,9 @@ impl<W: io::Write> View<W> {
                     prompt.chars().count() + 3));
 
         // Show the cursor.
-        write!(self.writer, "\x1b[?25h")
+        try!(write!(self.writer, "\x1b[?25h"));
+
+        self.writer.flush()
     }
 }
 
