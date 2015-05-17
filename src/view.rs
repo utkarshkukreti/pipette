@@ -26,5 +26,5 @@ fn test_view_update() {
         };
         v.update("f", &["foo", "bar", "baz", "quux"]).unwrap();
     }
-    assert_eq!(out, b"\x1b[?25l\r\x1b[K> f\x1b[?25h");
+    assert_eq!(out, "!?25l\r!K> f!?25h".replace("!", "\x1b[").as_bytes());
 }
