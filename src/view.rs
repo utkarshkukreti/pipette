@@ -17,6 +17,11 @@ impl<W: io::Write> View<W> {
             try!(write!(self.writer, "\n\r\x1b[K{}", candidate))
         }
 
+        // Jump back to the last char of the prompt.
+        try!(write!(self.writer, "\x1b[{}A\x1b[{}G",
+                    candidates.len(),
+                    prompt.chars().count() + 3));
+
         // Show the cursor.
         write!(self.writer, "\x1b[?25h")
     }
@@ -35,5 +40,5 @@ fn test_view_update() {
 \r!Kfoo
 \r!Kbar
 \r!Kbaz
-\r!Kquux!?25h".replace("!", "\x1b[").as_bytes());
+\r!Kquux!4A!4G!?25h".replace("!", "\x1b[").as_bytes());
 }
