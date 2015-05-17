@@ -5,9 +5,12 @@ pub struct View<W: io::Write> {
 }
 
 impl<W: io::Write> View<W> {
-    pub fn update(&mut self, _prompt: &str, _candidates: &[&str]) -> io::Result<()> {
+    pub fn update(&mut self, prompt: &str, _candidates: &[&str]) -> io::Result<()> {
         // Hide the cursor.
         try!(write!(self.writer, "\x1b[?25l"));
+
+        // Clear the line and print the prompt.
+        try!(write!(self.writer, "\r\x1b[K> {}", prompt));
 
         // Show the cursor.
         write!(self.writer, "\x1b[?25h")
@@ -23,5 +26,5 @@ fn test_view_update() {
         };
         v.update("f", &["foo", "bar", "baz", "quux"]).unwrap();
     }
-    assert_eq!(out, b"\x1b[?25l\x1b[?25h");
+    assert_eq!(out, b"\x1b[?25l\r\x1b[K> f\x1b[?25h");
 }
