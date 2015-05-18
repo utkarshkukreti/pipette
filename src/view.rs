@@ -5,6 +5,12 @@ pub struct View<W: io::Write> {
 }
 
 impl<W: io::Write> View<W> {
+    pub fn new(writer: W) -> View<W> {
+        View {
+            writer: writer
+        }
+    }
+
     pub fn update(&mut self, prompt: &str, candidates: &[&str]) -> io::Result<()> {
         // Hide the cursor.
         try!(write!(self.writer, "\x1b[?25l"));
