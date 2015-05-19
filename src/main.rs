@@ -1,3 +1,4 @@
+mod pipette;
 mod score;
 mod view;
 
