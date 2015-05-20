@@ -1,1 +1,3 @@
-pub struct Pipette;
+pub struct Pipette {
+    candidates: Vec<String>
+}
