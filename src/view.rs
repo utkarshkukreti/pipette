@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::io;
 
 pub struct View;
@@ -7,11 +8,13 @@ impl View {
         View
     }
 
-    pub fn update<W: io::Write>(&mut self,
-                                writer: &mut W,
-                                prompt: &str,
-                                candidates: &[&str],
-                                selected: usize) -> io::Result<()> {
+    pub fn update<W, S>(&mut self,
+                        writer: &mut W,
+                        prompt: &str,
+                        candidates: &[S],
+                        selected: usize) -> io::Result<()>
+        where S: Borrow<str>, W: io::Write
+    {
         // Hide the cursor.
         try!(write!(writer, "\x1b[?25l"));
 
@@ -28,7 +31,7 @@ impl View {
             }
 
             // Print the candidate
-            try!(write!(writer, "{}", candidate));
+            try!(write!(writer, "{}", candidate.borrow()));
 
             if i == selected {
                 // Reset all SGR attributes.
