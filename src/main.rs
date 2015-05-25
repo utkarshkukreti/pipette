@@ -1,4 +1,5 @@
 mod pipette;
+mod reader;
 mod score;
 mod view;
 
