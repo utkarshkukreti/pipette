@@ -58,18 +58,13 @@ fn test_reader_read() {
                  240, 159, 153, 128];
     let mut reader = Reader::new(&input[..]);
 
-    assert_eq!(reader.read().unwrap().unwrap(), CtrlC);
-    assert_eq!(reader.read().unwrap().unwrap(), CtrlH);
-    assert_eq!(reader.read().unwrap().unwrap(), CtrlJ);
-    assert_eq!(reader.read().unwrap().unwrap(), CtrlM);
-    assert_eq!(reader.read().unwrap().unwrap(), CtrlN);
-    assert_eq!(reader.read().unwrap().unwrap(), CtrlP);
-    assert_eq!(reader.read().unwrap().unwrap(), CtrlU);
-    assert_eq!(reader.read().unwrap().unwrap(), Delete);
-    assert_eq!(reader.read().unwrap().unwrap(), Other);
-    assert_eq!(reader.read().unwrap().unwrap(), Char(' '));
-    assert_eq!(reader.read().unwrap().unwrap(), Char('π'));
-    assert_eq!(reader.read().unwrap().unwrap(), Char('♘'));
-    assert_eq!(reader.read().unwrap().unwrap(), Char('🙀'));
+    macro_rules! go {
+        ($reader:expr => [$($key:expr),+]) => {{
+            $(assert_eq!($reader.read().unwrap().unwrap(), $key);)+
+        }}
+    }
+
+    go!(reader => [CtrlC, CtrlH, CtrlJ, CtrlM, CtrlN, CtrlP, CtrlU, Delete,
+                   Other, Char(' '), Char('π'), Char('♘'), Char('🙀')]);
     assert!(reader.read().is_none());
 }
