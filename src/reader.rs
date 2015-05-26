@@ -17,3 +17,11 @@ pub enum Key {
     Delete,
     Other
 }
+
+impl<R: io::Read> Reader<R> {
+    pub fn new(inner: R) -> Reader<R> {
+        Reader {
+            inner: inner
+        }
+    }
+}
