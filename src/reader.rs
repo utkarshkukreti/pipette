@@ -1,7 +1,7 @@
 use std::io;
 
 pub struct Reader<R: io::Read> {
-    inner: R
+    inner: io::Chars<R>
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -21,25 +21,28 @@ pub enum Key {
 impl<R: io::Read> Reader<R> {
     pub fn new(inner: R) -> Reader<R> {
         Reader {
-            inner: inner
+            inner: inner.chars()
         }
     }
 
-    pub fn read(&mut self) -> io::Result<Key> {
+    pub fn read(&mut self) -> Option<Result<Key, io::CharsError>> {
         use self::Key::*;
 
-        let mut buf = [0];
-        try!(self.inner.read(&mut buf));
-        Ok(match buf[0] {
-            3 => CtrlC,
-            8 => CtrlH,
-            10 => CtrlJ,
-            13 => CtrlM,
-            14 => CtrlN,
-            16 => CtrlP,
-            21 => CtrlU,
-            127 => Delete,
-            _ => Other
+        self.inner.next().map(|result| {
+            result.map(|char| {
+                match char as u32 {
+                    3 => CtrlC,
+                    8 => CtrlH,
+                    10 => CtrlJ,
+                    13 => CtrlM,
+                    14 => CtrlN,
+                    16 => CtrlP,
+                    21 => CtrlU,
+                    127 => Delete,
+                    0 ... 31 => Other,
+                    _ => Char(char)
+                }
+            })
         })
     }
 }
@@ -48,16 +51,25 @@ impl<R: io::Read> Reader<R> {
 fn test_reader_read() {
     use self::Key::*;
 
-    let input = [3, 8, 10, 13, 14, 16, 21, 127, 1];
+    let input = [3, 8, 10, 13, 14, 16, 21, 127, 1,
+                 32,
+                 207, 128,
+                 226, 153, 152,
+                 240, 159, 153, 128];
     let mut reader = Reader::new(&input[..]);
 
-    assert_eq!(reader.read().unwrap(), CtrlC);
-    assert_eq!(reader.read().unwrap(), CtrlH);
-    assert_eq!(reader.read().unwrap(), CtrlJ);
-    assert_eq!(reader.read().unwrap(), CtrlM);
-    assert_eq!(reader.read().unwrap(), CtrlN);
-    assert_eq!(reader.read().unwrap(), CtrlP);
-    assert_eq!(reader.read().unwrap(), CtrlU);
-    assert_eq!(reader.read().unwrap(), Delete);
-    assert_eq!(reader.read().unwrap(), Other);
+    assert_eq!(reader.read().unwrap().unwrap(), CtrlC);
+    assert_eq!(reader.read().unwrap().unwrap(), CtrlH);
+    assert_eq!(reader.read().unwrap().unwrap(), CtrlJ);
+    assert_eq!(reader.read().unwrap().unwrap(), CtrlM);
+    assert_eq!(reader.read().unwrap().unwrap(), CtrlN);
+    assert_eq!(reader.read().unwrap().unwrap(), CtrlP);
+    assert_eq!(reader.read().unwrap().unwrap(), CtrlU);
+    assert_eq!(reader.read().unwrap().unwrap(), Delete);
+    assert_eq!(reader.read().unwrap().unwrap(), Other);
+    assert_eq!(reader.read().unwrap().unwrap(), Char(' '));
+    assert_eq!(reader.read().unwrap().unwrap(), Char('π'));
+    assert_eq!(reader.read().unwrap().unwrap(), Char('♘'));
+    assert_eq!(reader.read().unwrap().unwrap(), Char('🙀'));
+    assert!(reader.read().is_none());
 }

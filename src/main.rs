@@ -1,3 +1,5 @@
+#![feature(io)]
+
 mod pipette;
 mod reader;
 mod score;
