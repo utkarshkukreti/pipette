@@ -4,6 +4,7 @@ pub struct Reader<R: io::Read> {
     inner: R
 }
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Key {
     Char(char),
     CtrlC,
