@@ -18,4 +18,36 @@ impl<R: io::Read, W: io::Write> Pipette<R, W> {
             view: View::new()
         }
     }
+
+    pub fn exec(&mut self) -> Option<String> {
+        use reader::Key::*;
+        let mut selected = 0;
+        let mut prompt = "";
+        loop {
+            self.view.update(&mut self.writer, prompt, &self.candidates,
+                             selected);
+            match self.reader.read() {
+                Some(Ok(key)) => match key {
+                    CtrlM => return Some(self.candidates[selected].clone()),
+                    _ => unimplemented!()
+                },
+                _ => unimplemented!()
+            }
+        }
+    }
+}
+
+#[test]
+fn test_pipette_exec() {
+    let input = b"\x0d";
+    let mut out = vec![];
+    let candidates = vec!["foo".into(), "bar".into(), "baz".into()];
+    {
+        let mut pipette = Pipette::new(&input[..], &mut out, candidates);
+        assert_eq!(pipette.exec(), Some("foo".into()));
+    }
+    assert_eq!(out, "!?25l\r!K>\x20
+\r!K!37;41mfoo!0m
+\r!Kbar
+\r!Kbaz!3A!3G!?25h".replace("!", "\x1b[").as_bytes());
 }
