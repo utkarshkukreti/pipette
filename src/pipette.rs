@@ -28,6 +28,7 @@ impl<R: io::Read, W: io::Write> Pipette<R, W> {
                              selected);
             match self.reader.read() {
                 Some(Ok(key)) => match key {
+                    CtrlC => return None,
                     CtrlM => return Some(self.candidates[selected].clone()),
                     CtrlN => {
                         if selected + 1 < self.candidates.len() {
@@ -94,4 +95,7 @@ fn test_pipette_exec() {
 \r!Kbar
 \r!Kbaz!3A!3G!?25h\
 ".replace("!", "\x1b[").as_bytes());
+
+    let mut pipette = Pipette::new(&b"\x03"[..], vec![], vec!["foo".into()]);
+    assert_eq!(pipette.exec(), None);
 }
